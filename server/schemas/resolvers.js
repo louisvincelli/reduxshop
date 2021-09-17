@@ -1,26 +1,12 @@
-const { User, Product, Orders, Category } = require('../models');
+const { User, Product, Order, Category } = require('../models');
 const { AuthenticationError } = require('apollo-server-express');
 const { signToken } = require('../auth/auth');
 //const stripe = require('stripe')();
 
 const resolvers = {
   Query: {
-    user: async (parent, args, context) => {
-      if(context.user){
-        const user = await User.findById(context.user._id).populate({
-          path: 'orders.products',
-          populate: 'category',
-        });
-        user.orders.sort((a,b) => {b.purchaseDate-a.purchaseDate});
-        return user;
-      }
-      throw new AuthenticationError("Not Logged In!")
-    },
     categories: async () => {
       return await Category.find();
-    },
-    product: async(parent, {_id}) => {
-      return await Product.findById(_id).populate("category");
     },
     products: async(parent, {category,name}) => {
       const params = {};
@@ -31,6 +17,20 @@ const resolvers = {
         params.name = {$regex: name};
       }
       return await Product.find(params).populate(category);
+    },
+    product: async(parent, {_id}) => {
+      return await Product.findById(_id).populate("category");
+    },
+    user: async (parent, args, context) => {
+      if(context.user){
+        const user = await User.findById(context.user._id).populate({
+          path: 'orders.products',
+          populate: 'category',
+        });
+        user.orders.sort((a,b) => {b.purchaseDate-a.purchaseDate});
+        return user;
+      }
+      throw new AuthenticationError("Not Logged In!")
     },
     order: async(parent, {_id}, context) => {
       if(context.user){
