@@ -24,7 +24,7 @@ const userSchema = new Schema({
     required: true,
     trim: true,
   },
-  orders: [Order.Schema],
+  orders: [Order.schema],
 });
 
 userSchema.pre('save', async function(next) {
@@ -40,6 +40,6 @@ userSchema.methods.isCorrectPassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };
 
-const User = mongoose.model('User', userschema);
+const User = mongoose.model('User', userSchema);
 
 module.exports = User;
